@@ -19,12 +19,6 @@ const sequelize = new Sequelize(sequelizeConfig);
 
 const models_path = `${__dirname}/models/master`;// Import all model files
 
-// model_list.forEach((ele)=>{
-//   console.log(ele)
-//   const model = sequelize.import(path.join(models_path,`${ele}.js`))
-//   model[model.name] = model
-// })
-// console.log(models_path)
 fs
   .readdirSync(models_path)
   .filter((file) => (file.indexOf('.') !== 0) && (file.slice(-3) === '.js'))
