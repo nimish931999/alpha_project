@@ -1,7 +1,7 @@
-import { compare, hash } from 'bcrypt';
-import { DataTypes, Model } from 'sequelize';
+import { compare, hash } from "bcrypt";
+import { DataTypes, Model } from "sequelize";
 
-import { tokenHelper, mailHelper } from '@/helpers';
+import { tokenHelper, mailHelper } from "@/helpers";
 
 export default function (sequelize) {
   class User extends Model {
@@ -9,7 +9,7 @@ export default function (sequelize) {
       return `${this.firstName} ${this.lastName}`;
     }
 
-    generateToken(expiresIn = '1h') {
+    generateToken(expiresIn = "1h") {
       const data = { id: this.id, email: this.email };
       return tokenHelper.generateToken(data, expiresIn);
     }
@@ -24,54 +24,82 @@ export default function (sequelize) {
     }
 
     static associate(models) {
-      User.hasMany(models.tweet, { foreignKey: 'userId' });
+      User.hasMany(models.tweet, { foreignKey: "userId" });
     }
   }
 
-  User.init({
-    firstName: {
-      type: DataTypes.STRING(30),
-      allowNull: false,
+  User.init(
+    {
+      firstName: {
+        type: DataTypes.STRING(30),
+        allowNull: false,
+      },
+      lastName: {
+        type: DataTypes.STRING(30),
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      dob: {
+        type: DataTypes.STRING(30),
+        allowNull: false,
+      },
+      phone_number: {
+        type: DataTypes.STRING(30),
+        allowNull: false,
+      },
+      bike_type: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+      },
+      bike_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      rider_tag: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+      },
+      experience: {
+        type: DataTypes.ENUM("beginner", "amateur", "professional"),
+        allowNull: false,
+      },
     },
-    lastName: {
-      type: DataTypes.STRING(30),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-  }, {
-    modelName: 'user',
-    sequelize,
-  });
+    {
+      modelName: "user",
+      sequelize,
+    }
+  );
 
-  User.addHook('beforeSave', async (instance) => {
-    if (instance.changed('password')) {
+  User.addHook("beforeSave", async (instance) => {
+    if (instance.changed("password")) {
       // eslint-disable-next-line no-param-reassign
       instance.password = await hash(instance.password, 10);
     }
   });
 
-  User.addHook('afterCreate', (instance) => {
+  User.addHook("afterCreate", (instance) => {
     // Send welcome message to user.
     const payload = {
-      subject: 'Welcome to Express Starter',
-      html: 'Your account is created successfully!',
+      subject: "Welcome to Express Starter",
+      html: "Your account is created successfully!",
     };
     instance.sendMail(payload);
   });
 
-  User.addHook('afterDestroy', (instance) => {
+  User.addHook("afterDestroy", (instance) => {
     // Send good by message to user.
     const payload = {
-      subject: 'Sorry to see you go',
-      html: 'Your account is destroyed successfully!',
+      subject: "Sorry to see you go",
+      html: "Your account is destroyed successfully!",
     };
     instance.sendMail(payload);
   });

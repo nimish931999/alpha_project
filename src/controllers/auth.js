@@ -1,6 +1,6 @@
-import createError from 'http-errors';
+import createError from "http-errors";
 
-import db from '@/database';
+import db from "@/database";
 
 /**
  * POST /auth/login
@@ -13,18 +13,18 @@ export const login = async (req, res, next) => {
     // Find user by email address
     const user = await db.models.user.findOne({ where: { email } });
     if (!user) {
-      return next(createError(400, 'There is no user with this email address!'));
+      return next(createError(400, "There is no user with this email address!"));
     }
 
     // Check user password
     const isValidPassword = await user.validatePassword(password);
     if (!isValidPassword) {
-      return next(createError(400, 'Incorrect password!'));
+      return next(createError(400, "Incorrect password!"));
     }
 
     // Generate and return token
     const token = user.generateToken();
-    const refreshToken = user.generateToken('2h');
+    const refreshToken = user.generateToken("2h");
     return res.status(200).json({ token, refreshToken });
   } catch (err) {
     return next(err);
@@ -38,16 +38,28 @@ export const login = async (req, res, next) => {
 export const register = async (req, res, next) => {
   try {
     // Create user
-    const user = await db.models.user
-      .create(req.body, {
-        fields: ['firstName', 'lastName', 'email', 'password'],
-      });
+    console.log(req.body);
+    const user = await db.models.user.create(req.body, {
+      fields: [
+        "firstName",
+        "lastName",
+        "email",
+        "password",
+        "dob",
+        "phone_number",
+        "bike_type",
+        "bike_name",
+        "rider_tag",
+        "experience",
+      ],
+    });
 
     // Generate and return tokens
     const token = user.generateToken();
-    const refreshToken = user.generateToken('2h');
+    const refreshToken = user.generateToken("2h");
     res.status(201).json({ token, refreshToken });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
@@ -72,7 +84,7 @@ export const getCurrentUser = async (req, res, next) => {
 export const updateCurrentUser = async (req, res, next) => {
   try {
     await req.user.update(req.body, {
-      fields: ['firstName', 'lastName', 'email'],
+      fields: ["firstName", "lastName", "email"],
     });
     res.status(200).json({ success: true });
   } catch (err) {
@@ -104,7 +116,7 @@ export const updatePassword = async (req, res, next) => {
     // Check user password
     const isValidPassword = await req.user.validatePassword(current);
     if (!isValidPassword) {
-      return next(createError(400, 'Incorrect password!'));
+      return next(createError(400, "Incorrect password!"));
     }
 
     // Update password

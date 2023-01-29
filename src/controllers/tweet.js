@@ -1,7 +1,7 @@
-import createError from 'http-errors';
+import createError from "http-errors";
 
-import db from '@/database';
-import redisClient from '@/libs/redis';
+import db from "@/database";
+import redisClient from "@/libs/redis";
 
 /**
  * POST /tweets
@@ -13,10 +13,9 @@ export const createTweet = async (req, res, next) => {
 
     // Create tweet
     const tweetData = { ...req.body, userId };
-    const tweet = await db.models.tweet
-      .create(tweetData, {
-        fields: ['userId', 'tweet'],
-      });
+    const tweet = await db.models.tweet.create(tweetData, {
+      fields: ["userId", "tweet"],
+    });
 
     // Save this tweet to redis
     if (redisClient.connected) {
@@ -37,16 +36,15 @@ export const getTweets = async (req, res, next) => {
     const { page = 1, perPage = 10 } = req.query;
     const offset = page * perPage - perPage;
 
-    const tweetListResponse = await db.models.tweet
-      .findAndCountAll({
-        offset,
-        limit: perPage,
-        include: {
-          model: db.models.user,
-          attributes: ['id', 'firstName', 'lastName'],
-        },
-        order: [['createdAt', 'DESC']],
-      });
+    const tweetListResponse = await db.models.tweet.findAndCountAll({
+      offset,
+      limit: perPage,
+      include: {
+        model: db.models.user,
+        attributes: ["id", "firstName", "lastName"],
+      },
+      order: [["createdAt", "DESC"]],
+    });
 
     if (redisClient.connected) {
       tweetListResponse.rows.forEach((tweet) => {
@@ -56,7 +54,10 @@ export const getTweets = async (req, res, next) => {
 
     const totalPage = Math.ceil(tweetListResponse.count / perPage);
     const response = {
-      ...tweetListResponse, page, totalPage, perPage,
+      ...tweetListResponse,
+      page,
+      totalPage,
+      perPage,
     };
     return res.json(response);
   } catch (err) {
@@ -72,22 +73,21 @@ export const getTweetById = async (req, res, next) => {
   try {
     const { id: tweetId } = req.params;
 
-    const tweet = await db.models.tweet
-      .findOne({
-        where: { id: tweetId },
-        include: {
-          model: db.models.user,
-          attributes: ['id', 'firstName', 'lastName'],
-        },
-      });
+    const tweet = await db.models.tweet.findOne({
+      where: { id: tweetId },
+      include: {
+        model: db.models.user,
+        attributes: ["id", "firstName", "lastName"],
+      },
+    });
     if (!tweet) {
-      return next(createError(404, 'There is no tweet with this id!'));
+      return next(createError(404, "There is no tweet with this id!"));
     }
 
     // Save this tweet to redis
-    if (redisClient.connected) {
-      redisClient.set(req.cacheName, JSON.stringify(tweet));
-    }
+    // if (redisClient.connected) {
+    //   redisClient.set(req.cacheName, JSON.stringify(tweet));
+    // }
     return res.status(200).json(tweet);
   } catch (err) {
     return next(err);
@@ -105,7 +105,7 @@ export const deleteTweet = async (req, res, next) => {
 
     const tweet = await db.models.tweet.findOne({ where: { id: tweetId, userId } });
     if (!tweet) {
-      return next(createError(404, 'There is no tweet with this id!'));
+      return next(createError(404, "There is no tweet with this id!"));
     }
 
     // Remove this tweet from redis, if exist
