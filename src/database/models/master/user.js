@@ -23,9 +23,9 @@ export default function (sequelize) {
       return mailHelper.sendMail(payload);
     }
 
-    static associate(models) {
-      User.hasMany(models.tweet, { foreignKey: "userId" });
-    }
+    // static associate(models) {
+    //   User.hasMany(models.expedition, { foreignKey: "id" });
+    // }
   }
 
   User.init(
@@ -70,6 +70,14 @@ export default function (sequelize) {
       },
       experience: {
         type: DataTypes.ENUM("beginner", "amateur", "professional"),
+        allowNull: false,
+      },
+      license_number: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      aadhar_number: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
     },

@@ -84,7 +84,18 @@ export const getCurrentUser = async (req, res, next) => {
 export const updateCurrentUser = async (req, res, next) => {
   try {
     await req.user.update(req.body, {
-      fields: ["firstName", "lastName", "email"],
+      fields: [
+        "firstName",
+        "lastName",
+        "email",
+        "password",
+        "dob",
+        "phone_number",
+        "bike_type",
+        "bike_name",
+        "rider_tag",
+        "experience",
+      ],
     });
     res.status(200).json({ success: true });
   } catch (err) {
